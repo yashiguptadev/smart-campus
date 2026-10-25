@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Booking requests · Smart Campus Resource Optimizer{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Booking requests</h1>
+<p class="text-secondary mb-4">Approve or reject pending requests. Rejecting frees the slot again.</p>
+
+{% set tabs = [('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('cancelled', 'Cancelled'), ('all', 'All')] %}
+<nav class="filter-tabs" aria-label="Filter bookings">
+  {% for key, label in tabs %}
+  <a class="{{ 'active' if key == status }}" href="{{ url_for('admin.bookings', status=key) }}">{{ label }}{% if key in counts %} ({{ counts[key] }}){% endif %}</a>
+  {% endfor %}
+</nav>
+
+<div id="booking-queue">
+  {% if rows %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>ID</th><th>Requested by</th><th>Resource</th><th>Date</th><th>Time</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for b in rows %}
+        <tr data-booking="{{ b.code }}">
+          <td>{{ b.code }}</td>
+          <td>{{ b.user.name }} <span class="text-secondary">· {{ b.user.role_label }}</span></td>
+          <td>{{ b.resource.name }}</td>
+          <td>{{ b.date.strftime('%d %b %Y') }}</td>
+          <td>{{ b.start_time.strftime('%H:%M') }}–{{ b.end_time.strftime('%H:%M') }}</td>
+          <td>{{ b.purpose or '—' }}</td>
+          <td><span class="status status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+          <td class="text-end">
+            {% if b.status == 'pending' %}
+            <div class="d-inline-flex gap-2">
+              <form method="post" action="{{ url_for('admin.decide', booking_id=b.id, action='approve') }}" class="m-0">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="{{ status }}">
+                <button class="btn btn-sm btn-primary" type="submit">Approve</button>
+              </form>
+              <form method="post" action="{{ url_for('admin.decide', booking_id=b.id, action='reject') }}" class="m-0"
+                    onsubmit="return confirm('Reject booking {{ b.code }}?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="{{ status }}">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
+              </form>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">{% if status == 'pending' %}No requests are waiting for a decision.{% else %}No bookings with this status.{% endif %}</p>
+  {% endif %}
+</div>
+{% endblock %}

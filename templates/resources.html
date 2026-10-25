@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Resources · Smart Campus Resource Optimizer{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Resources</h1>
+<p class="text-secondary mb-4">Search by name, type or location, then open a resource to see when it is free.</p>
+
+<form class="search-bar" method="get" action="{{ url_for('resources.list_resources') }}">
+  <label class="visually-hidden" for="search">Search resources</label>
+  <input class="form-control" type="search" id="search" name="q" value="{{ q }}" placeholder="Computer Lab, projector, Block 1…">
+  <button class="btn btn-primary" type="submit" id="search-button">Search</button>
+  {% if q %}<a class="btn btn-outline-secondary" href="{{ url_for('resources.list_resources') }}">Clear</a>{% endif %}
+</form>
+
+<div id="resource-list">
+  {% if resources %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Name</th><th>Type</th><th>Location</th><th>Capacity</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in resources %}
+        <tr>
+          <td><a href="{{ url_for('resources.detail', resource_id=r.id) }}">{{ r.name }}</a></td>
+          <td>{{ r.type|capitalize }}</td>
+          <td>{{ r.location or '—' }}</td>
+          <td>{{ r.capacity }}</td>
+          <td>
+            {% if r.status == 'available' %}<span class="status status-approved">Available</span>
+            {% else %}<span class="status status-pending">Under maintenance</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elif q %}
+  <p class="empty">No resource matches “{{ q }}”. Check the spelling or clear the search to see everything.</p>
+  {% else %}
+  <p class="empty">No resources have been added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}My bookings · Smart Campus Resource Optimizer{% endblock %}
+
+{% block content %}
+<h1 class="page-title">My bookings</h1>
+<p class="text-secondary mb-4">Pending and approved bookings hold the slot. Cancel one to free it.</p>
+
+<div id="booking-list">
+  {% if bookings %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>ID</th><th>Resource</th><th>Date</th><th>Time</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td>{{ b.code }}</td>
+          <td>{{ b.resource.name }}</td>
+          <td>{{ b.date.strftime('%d %b %Y') }}</td>
+          <td>{{ b.start_time.strftime('%H:%M') }}–{{ b.end_time.strftime('%H:%M') }}</td>
+          <td>{{ b.purpose or '—' }}</td>
+          <td><span class="status status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+          <td class="text-end">
+            {% if b.status in ('pending', 'approved') and b.date >= today %}
+            <form method="post" action="{{ url_for('bookings.cancel', booking_id=b.id) }}" class="m-0"
+                  onsubmit="return confirm('Cancel booking {{ b.code }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Cancel booking</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">You haven't booked anything yet. <a href="{{ url_for('resources.list_resources') }}">Find a resource</a> to get started.</p>
+  {% endif %}
+</div>
+{% endblock %}

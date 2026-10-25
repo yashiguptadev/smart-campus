@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Not allowed · Smart Campus Resource Optimizer{% endblock %}
+{% block content %}
+<h1 class="page-title">You can't open this page</h1>
+<p class="text-secondary">Your role doesn't have access to it.</p>
+<a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Back to dashboard</a>
+{% endblock %}
