@@ -1,28 +1,45 @@
-# Selenium tests for the Smart Campus Resource Optimizer
+# Smart Campus Resource Optimizer
 
-Automates test cases TC01–TC12 in Chrome and writes the Lab 12 execution record.
+A web app for booking shared campus resources (labs, halls and equipment) without clashes. Built for a Software Engineering lab.
 
-## Run
+**Live demo:** https://smart-campus-9cia.onrender.com (free hosting, so the first visit after a quiet spell takes about a minute)
 
-1. Start the app in one terminal: `python app.py`
-2. In a second terminal (venv active), from the project folder:
+## Features
 
-```
-pip install -r tests\requirements-test.txt
-python tests\run_campus_tests.py
-```
+- Login and registration with four roles: student, faculty, administrator and maintenance staff
+- Resource search and hourly availability by date
+- Booking with a conflict check, cancellation, and admin approval or rejection
+- Issue reporting and a maintenance workflow (a resource is under maintenance while work is done)
+- In-app notifications
 
-Add `--headless` to run without opening a browser window.
-The first run needs internet so Selenium can fetch the Chrome driver.
+## Tech stack
 
-## Output (in `tests\test_results\`)
+Python, Flask, SQLAlchemy, Jinja2 and Bootstrap. Works with MySQL, Postgres or SQLite. Selenium for automated tests.
 
-- `execution_record.md`: table with actual result and Pass/Fail for each test, ready to paste into the report
-- `execution_record.csv`: the same table for Excel
-- `screenshots\`: one screenshot per test case
+## Demo accounts
 
-## Notes
+- Student: student@muj.edu / Stu@123
+- Faculty: faculty@muj.edu / Fac@123
+- Administrator and maintenance accounts are created by the seed script. Their passwords come from the ADMIN_PASSWORD and MAINT_PASSWORD settings.
 
-- Needs the demo accounts from `seed.py` (student, admin, maintenance).
-- The tests create their own bookings and issues on a random free future date, so you can run them again and again.
-- Don't click around in the browser window while it runs.
+## Run locally (Windows)
+
+    python -m venv venv
+    venv\Scripts\activate
+    pip install -r requirements.txt
+    copy .env.example .env
+    python seed.py
+    python app.py
+
+Then open http://127.0.0.1:5000
+
+## Tests
+
+With the app running, in a second terminal:
+
+    pip install -r tests\requirements-test.txt
+    python tests\run_campus_tests.py
+
+## Deployment
+
+See DEPLOY.md for the Render steps.
