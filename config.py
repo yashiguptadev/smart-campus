@@ -10,8 +10,11 @@ def _database_url():
     url = os.environ.get("DATABASE_URL")
     if not url:
         return "sqlite:///" + os.path.join(basedir, "campus.db")
-    if url.startswith("postgres://"):  # older style some hosts still hand out
-        url = "postgresql://" + url[len("postgres://"):]
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            # name the psycopg2 driver explicitly: newer SQLAlchemy defaults to psycopg 3
+            url = "postgresql+psycopg2://" + url[len(prefix):]
+            break
     return url
 
 
