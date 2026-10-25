@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Report an issue · Smart Campus Resource Optimizer{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('issues.list_issues') }}">&larr; My issues</a>
+<h1 class="page-title mt-2">Report an issue</h1>
+<p class="text-secondary mb-4">Tell maintenance what is wrong. They will see it straight away.</p>
+
+<form method="post" id="issue-form" class="form-narrow" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3">
+    <label class="form-label" for="resource_id">Resource</label>
+    <select class="form-select" id="resource_id" name="resource_id" required>
+      <option value="">Choose a resource</option>
+      {% for r in resources %}
+      <option value="{{ r.id }}" {{ 'selected' if r.id == form.resource_id }}>{{ r.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-4">
+    <label class="form-label" for="description">What is wrong?</label>
+    <textarea class="form-control" id="description" name="description" rows="4" maxlength="1000" placeholder="Projector not working" required>{{ form.description }}</textarea>
+  </div>
+  <button class="btn btn-primary" type="submit" id="submit-issue">Report issue</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('issues.list_issues') }}">Cancel</a>
+</form>
+{% endblock %}

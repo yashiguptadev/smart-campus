@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Book {{ resource.name }} · Smart Campus Resource Optimizer{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('resources.detail', resource_id=resource.id, date=form.date) }}">&larr; Back to {{ resource.name }}</a>
+<h1 class="page-title mt-2">Book {{ resource.name }}</h1>
+<p class="text-secondary mb-4">{{ resource.type|capitalize }} · {{ resource.location or 'Location not set' }} · Capacity {{ resource.capacity }}</p>
+
+<form method="post" id="book-form" class="form-narrow" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="resource_id" value="{{ resource.id }}">
+
+  <div class="mb-3">
+    <label class="form-label" for="date">Date</label>
+    <input class="form-control" type="date" id="date" name="date" value="{{ form.date }}" min="{{ today.isoformat() }}" required>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col">
+      <label class="form-label" for="start">Start</label>
+      <select class="form-select" id="start" name="start">
+        {% for h in start_options %}<option value="{{ h }}" {{ 'selected' if h == form.start }}>{{ h }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col">
+      <label class="form-label" for="end">End</label>
+      <select class="form-select" id="end" name="end">
+        {% for h in end_options %}<option value="{{ h }}" {{ 'selected' if h == form.end }}>{{ h }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="form-label" for="purpose">Purpose</label>
+    <input class="form-control" id="purpose" name="purpose" maxlength="255" value="{{ form.purpose }}" placeholder="Project work" required>
+  </div>
+
+  <button class="btn btn-primary" type="submit" id="submit-booking">Request booking</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('resources.detail', resource_id=resource.id, date=form.date) }}">Cancel</a>
+</form>
+{% endblock %}

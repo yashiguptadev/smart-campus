@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ resource.name }} · Smart Campus Resource Optimizer{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('resources.list_resources') }}">&larr; All resources</a>
+<h1 class="page-title mt-2">{{ resource.name }}</h1>
+<p class="text-secondary mb-4">
+  {{ resource.type|capitalize }} · {{ resource.location or 'Location not set' }} · Capacity {{ resource.capacity }}
+</p>
+
+{% if resource.status != 'available' %}
+<div class="alert alert-warning" role="alert">This resource is under maintenance, so it can't be booked right now.</div>
+{% endif %}
+
+{% if current_user.role in ('student', 'faculty', 'admin') %}
+<p><a href="{{ url_for('issues.new', resource_id=resource.id) }}">Report a problem with this resource</a></p>
+{% endif %}
+
+<form class="date-bar" method="get">
+  <label class="form-label mb-0" for="date">Date</label>
+  <input class="form-control" type="date" id="date" name="date" value="{{ day.isoformat() }}">
+  <button class="btn btn-primary" type="submit" id="check-button">Check availability</button>
+</form>
+
+<h2 class="section-title">
+  {{ day.strftime('%A, %d %B %Y') }}
+  {% if resource.status == 'available' and day >= today %}
+    <span class="text-secondary fw-normal">· {{ free_count }} of {{ slots|length }} slots free</span>
+  {% endif %}
+</h2>
+
+{% if day < today %}
+<p class="text-secondary">This date has passed, so no slots can be booked. Pick today or a later date.</p>
+{% endif %}
+
+<div class="slot-grid" id="slots">
+  {% set can_book = current_user.role in ('student', 'faculty') %}
+  {% for s in slots %}
+  {% if s.state == 'free' and can_book %}
+  <a class="slot slot-free slot-link" data-state="free"
+     href="{{ url_for('bookings.new', resource_id=resource.id, date=day.isoformat(), start=s.start.strftime('%H:%M')) }}">
+    <span class="slot-time">{{ s.start.strftime('%H:%M') }}–{{ s.end.strftime('%H:%M') }}</span>
+    <span class="slot-state">Free</span>
+  </a>
+  {% else %}
+  <div class="slot slot-{{ s.state }}" data-state="{{ s.state }}">
+    <span class="slot-time">{{ s.start.strftime('%H:%M') }}–{{ s.end.strftime('%H:%M') }}</span>
+    <span class="slot-state">
+      {% if s.state == 'free' %}Free
+      {% elif s.state == 'booked' %}Booked
+      {% elif s.state == 'maintenance' %}Unavailable
+      {% else %}Passed{% endif %}
+    </span>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+<p class="slot-note">Pending and approved bookings both hold a slot.{% if can_book and resource.status == 'available' %} Select a free slot to book it.{% endif %}</p>
+{% endblock %}
